@@ -59,9 +59,6 @@ public class ReportingStructureService : IReportingStructureService
         
         _logger.LogTrace($"Employee with id {id} has {numberOfDirectReports} direct reports.");
         
-        if (numberOfDirectReports == 0)
-            return numberOfDirectReports;
-
         foreach (var directReport in directReports)
         {
             numberOfDirectReports += await GetNumberOfDirectReportsAsync(directReport);
