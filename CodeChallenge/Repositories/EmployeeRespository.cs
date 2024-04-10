@@ -55,7 +55,8 @@ namespace CodeChallenge.Repositories
         /// If this was a production system this would not scale because of how many trips we make to the db
         /// for the direct reports. If this was a production system I would create a view that uses a recursive CTE
         /// that retrieves the recursive direct reports. This is so we only have to make one trip to the database
-        /// for all the recursive direct reports of a single employee. 
+        /// for all the recursive direct reports of a single employee. I know some people think repositories should
+        /// only get the entity, create a new entity, and save the changes (DDD), but for this challenge I decided against that.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
