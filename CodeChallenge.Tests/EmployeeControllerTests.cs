@@ -2,7 +2,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Text;
-
+using System.Threading.Tasks;
 using CodeChallenge.Models;
 
 using CodeCodeChallenge.Tests.Integration.Extensions;
@@ -82,7 +82,104 @@ namespace CodeCodeChallenge.Tests.Integration
             Assert.AreEqual(expectedFirstName, employee.FirstName);
             Assert.AreEqual(expectedLastName, employee.LastName);
         }
+        
+        // NOTE: I would normally break up these unit tests to test the controller and services separate.
+        // So the service tests really test the different logical scenarios and the controller tests are for the 
+        // correct responses. To keep consistent and since TestServer is already there for me, I stuck with just this 
+        // test class for the purpose of the challenge and since these are in a project name that mentions integration
+        // tests.
+        [TestMethod]
+        public async Task GetReportingStructure_Returns_Ok_1()
+        {
+            // Arrange
+            var employeeId = "16a596ae-edd3-4847-99fe-c4518e82c86f";
 
+            // Execute
+            var getResult = await _httpClient.GetAsync($"api/employee/{employeeId}/reporting-structure");
+            
+            // Assert
+            Assert.AreEqual(HttpStatusCode.OK, getResult.StatusCode);
+            var reportingStructure = getResult.DeserializeContent<ReportingStructure>();
+
+            Assert.AreEqual(employeeId, reportingStructure.Employee.EmployeeId);
+            Assert.AreEqual(reportingStructure.NumberOfReports, 4);
+        }
+        
+        [TestMethod]
+        public async Task GetReportingStructure_Returns_Ok_2()
+        {
+            // Arrange
+            var employeeId = "03aa1462-ffa9-4978-901b-7c001562cf6f";
+
+            // Execute
+            var getResult = await _httpClient.GetAsync($"api/employee/{employeeId}/reporting-structure");
+            
+            // Assert
+            Assert.AreEqual(HttpStatusCode.OK, getResult.StatusCode);
+            var reportingStructure = getResult.DeserializeContent<ReportingStructure>();
+
+            Assert.AreEqual(employeeId, reportingStructure.Employee.EmployeeId);
+            Assert.AreEqual(reportingStructure.NumberOfReports, 2);
+        }
+        
+        [TestMethod]
+        public async Task GetReportingStructure_Returns_Ok_3()
+        {
+            // Arrange
+            var employeeId = "62c1084e-6e34-4630-93fd-9153afb65309";
+
+            // Execute
+            var getResult = await _httpClient.GetAsync($"api/employee/{employeeId}/reporting-structure");
+            
+            // Assert
+            Assert.AreEqual(HttpStatusCode.OK, getResult.StatusCode);
+            var reportingStructure = getResult.DeserializeContent<ReportingStructure>();
+
+            Assert.AreEqual(employeeId, reportingStructure.Employee.EmployeeId);
+            Assert.AreEqual(reportingStructure.NumberOfReports, 0);
+        }
+        
+        [TestMethod]
+        public async Task GetReportingStructure_Returns_NotFound_BadId()
+        {
+            // Arrange
+            var employeeId = "badId:(";
+
+            // Execute
+            var getResult = await _httpClient.GetAsync($"api/employee/{employeeId}/reporting-structure");
+            
+            // Assert
+            Assert.AreEqual(HttpStatusCode.NotFound, getResult.StatusCode);
+        }
+        
+        [TestMethod]
+        public async Task GetReportingStructure_Returns_NotFound_EmptyString()
+        {
+            // Arrange
+            var employeeId = string.Empty;
+
+            // Execute
+            var getResult = await _httpClient.GetAsync($"api/employee/{employeeId}/reporting-structure");
+            
+            // Assert
+            Assert.AreEqual(HttpStatusCode.NotFound, getResult.StatusCode);
+        }
+        
+        [TestMethod]
+        public async Task GetReportingStructure_Returns_NotFound_NullString()
+        {
+            // Arrange
+            string employeeId = null;
+
+            // Execute
+            var getResult = await _httpClient.GetAsync($"api/employee/{employeeId}/reporting-structure");
+            
+            // Assert
+            Assert.AreEqual(HttpStatusCode.NotFound, getResult.StatusCode);
+        }
+        
+        // Moving these update tests below my tests so I don't have to update Pete Best back to having 2 direct reports
+        
         [TestMethod]
         public void UpdateEmployee_Returns_Ok()
         {
@@ -99,7 +196,7 @@ namespace CodeCodeChallenge.Tests.Integration
 
             // Execute
             var putRequestTask = _httpClient.PutAsync($"api/employee/{employee.EmployeeId}",
-               new StringContent(requestContent, Encoding.UTF8, "application/json"));
+                new StringContent(requestContent, Encoding.UTF8, "application/json"));
             var putResponse = putRequestTask.Result;
             
             // Assert
@@ -109,7 +206,7 @@ namespace CodeCodeChallenge.Tests.Integration
             Assert.AreEqual(employee.FirstName, newEmployee.FirstName);
             Assert.AreEqual(employee.LastName, newEmployee.LastName);
         }
-
+        
         [TestMethod]
         public void UpdateEmployee_Returns_NotFound()
         {
@@ -126,7 +223,7 @@ namespace CodeCodeChallenge.Tests.Integration
 
             // Execute
             var postRequestTask = _httpClient.PutAsync($"api/employee/{employee.EmployeeId}",
-               new StringContent(requestContent, Encoding.UTF8, "application/json"));
+                new StringContent(requestContent, Encoding.UTF8, "application/json"));
             var response = postRequestTask.Result;
 
             // Assert

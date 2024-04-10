@@ -15,11 +15,15 @@ namespace CodeChallenge.Controllers
     {
         private readonly ILogger _logger;
         private readonly IEmployeeService _employeeService;
+        private readonly IReportingStructureService _reportingStructureService;
 
-        public EmployeeController(ILogger<EmployeeController> logger, IEmployeeService employeeService)
+        public EmployeeController(ILogger<EmployeeController> logger, 
+            IEmployeeService employeeService, 
+            IReportingStructureService reportingStructureService)
         {
             _logger = logger;
             _employeeService = employeeService;
+            _reportingStructureService = reportingStructureService;
         }
 
         [HttpPost]
@@ -57,6 +61,23 @@ namespace CodeChallenge.Controllers
             _employeeService.Replace(existingEmployee, newEmployee);
 
             return Ok(newEmployee);
+        }
+
+        [HttpGet("{id}/reporting-structure")]
+        public async Task<IActionResult> GetReportingStructure(string id)
+        {
+            _logger.LogDebug($"Recieved employee reporting structure get request for '{id}'");
+
+            var reportingStructure = await _reportingStructureService.GetByEmployeeIdAsync(id);
+            
+            if (reportingStructure is null)
+            {
+                _logger.LogError($"Unable to build reporting structure for employee {id}");
+                return NotFound();
+            }
+            
+            _logger.LogDebug($"Employee {id} has {reportingStructure.NumberOfReports} reports");
+            return Ok(reportingStructure);
         }
     }
 }
